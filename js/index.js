@@ -1,69 +1,37 @@
 $(document).ready(function(){
 
   function Game(options){
-    var defaultOptions = {
-      size: 3
-    };
-    
-    if (typeof options == 'object') {
-      var options = $.extend(defaultOptions, options);
-    } 
-    else {
-      var options = defaultOptions;
-    }
-
-    var player1 = new Player('Human');
-    var player2 = new Player('AI');
-    var board = new Board();
-    var turns = 0;
-
-    this.setup = function(){
-      board.draw(options.size);
-      board.listen();
-    };
-
-    this.end = function(){
-
-    };
-
-    this.win = function(){
-
-    };
-
-    this.is_over = function(){
-
-    };
-
-    this.reset = function(){
-
-    };
-
-    this.step = function(square){
-      if (turns % 2 == 0){
-        player1.move(square, function(){
-          if (player2.type == "AI"){
-            turns++;
-            game.step();
-          }
-          else {
-            turns++;
-          }
-        });
-      }
-      else {
-        player2.move(square);
-        turns++;
-      }
-    }
+   
+    this.board = new Board();
+    this.active = true;
 
   }
 
+  Game.prototype = {
+    setup: function(){
+      this.board.draw(3);
+      this.board.listen();
+    },
+
+    reset: function(){
+
+    }
+  }
+
   function Board(){
-    var squares = [];
-    var that = this;
-    var canvas = $('#board');
-    this.draw = function(size){
-      
+    this.squares = [];
+    this.canvas = $('#board');
+    this.wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+  }
+
+  Board.prototype = {
+    draw: function(size){
+      console.log(this);
+      var canvas = this.canvas;
       var width = canvas.width();
       var context = canvas[0].getContext('2d');
       context.beginPath();
@@ -87,80 +55,134 @@ $(document).ready(function(){
 
       for(i=0;i<=size;i++){
         for(j=0;j<=size;j++){
-          squares.push(new Square(id++,width*j, height*i));
+          this.squares.push(new Square(id++,width*j, height*i, canvas));
         }
       }
-    }
+    },
 
-    this.listen = function(callback){
-      canvas.on('click', function(event){
-        var offset = $(this).offset();
-        x = event.pageX - offset.left;
-        y = event.pageY - offset.top;
-        $.each(squares, function(){
-          var id = this.check_position(x,y);
-          if(id >= 0){
-            if(squares[id].is_empty){
-              game.step();
+    listen: function(callback){
+      var squares = this.squares;
+      var that = this;
+      this.canvas.on('click', function(event){
+        if(game.active){
+          var offset = $(this).offset();
+          x = event.pageX - offset.left;
+          y = event.pageY - offset.top;
+          $.each(squares, function(){
+            var id = this.check_position(x,y);
+            if(id >= 0){
+              if(squares[id].value === null){
+                that.movePlayer(this);
+              }
             }
-          }
-        });
+          });
+        }
       });
-    };
+    },
 
-    var clear = function(){
+    getMoves: function(){
+      var moves = [];
+      for(i=0; i<this.squares.length;i++){
+        if(this.squares[i].value === null){
+          moves.push(this.squares[i].id);
+        }
+      }
+      return moves;
+    },
 
+    isFull: function(){
+      if (this.getMoves().length > 0){
+        return false;
+      }
+      else{
+        return true
+      }
+    },
+
+    hasWinner: function() {
+      var squares = this.squares;
+      var wins = this.wins;
+      for (var i = 0; i <= squares.length; i++) {
+        if (squares[wins[i][0]].value === squares[wins[i][1]].value 
+          && squares[wins[i][0]].value === squares[wins[i][2]].value 
+          && squares[wins[i][0]].value != null) {
+          game.active = false;
+          return squares[wins[i][0]].value;
+        }
+      }
+      return -1;
+    },
+
+    clear: function(){
+      canvas[0].width = canvas[0].width;
+    },
+
+    movePlayer: function(square){
+      var that = this;
+      square.draw('X', function(){
+        that.moveAI();
+        that.isFull();
+        that.hasWinner();
+      });
+
+    },
+
+    moveAI: function(){
+      //var bestMove = new Negamax();
+      // bestMove.draw('O', function(){
+      //   board.isFull();
+      //   board.hasWinner();
+      // });
     }
-
   };
 
-  function Square(id,offsetX, offsetY) {
-      var id = id;
-      var value = null;
-      var empty = true;
-      var xMin = offsetX;
-      var yMin = offsetY;
-
-      this.draw = function(canvas, shape){
-        if (shape == 'X') {
-
-        }
-        else if (shape == 'O'){
-
-        }
-      }
-
-      this.check_position = function(x,y){
-        var xMax = offsetX + 50;
-        var yMax = offsetY + 50;
-        if ((x >= xMin && x <= xMax) && (y >= yMin && y <= yMax)){
-          return id;
-        }
-      }
-
-      this.is_empty = function(){
-        if (empty == true) {
-          return true;
-        }
-        else {
-          return false;
-        }
-      }
-
+  function Square(id,offsetX, offsetY, canvas) {
+      this.id = id;
+      this.value = null;
+      this.canvas = canvas;
+      this.xMin = offsetX;
+      this.yMin = offsetY;
   }
 
-  function Player(type){
-   this.type = type;
-    this.move = function(square, callback){
-      if(type == 'Human') {
-        alert("human moved!");
+  Square.prototype = {
+    draw: function(shape, callback){
+      var xMin = this.xMin;
+      var yMin = this.yMin;
+      var context = this.canvas[0].getContext('2d');
+      if (shape == 'X') {
+        context.beginPath();
+        //draw first diagonal
+        context.moveTo(xMin+5,yMin+5);
+        context.lineTo(xMin+45,yMin+45);
+
+        //draw second diagonal
+        context.moveTo(xMin+45,yMin+5);
+        context.lineTo(xMin+5,yMin+45);
+        
+        context.stroke();
+        this.empty = false;
+        this.value = 'X';
         callback();
       }
-      else if(type == 'AI'){
-        alert('AI moved!');
+      else if (shape == 'O'){
+        //I can draw circles
+        context.beginPath();
+        context.arc(xMin+25,yMin+25,20,20,Math.PI*2,true);
+        context.stroke();
+      }
+    },
+
+    check_position: function(x,y){
+
+      //get which square we clicked on
+      var xMax = this.xMin + 50;
+      var yMax = this.yMin + 50;
+      if ((x >= this.xMin && x <= xMax) && (y >= this.yMin && y <= yMax)){
+        return this.id;
       }
     }
   }
+
 
   var game = new Game();
   game.setup();
