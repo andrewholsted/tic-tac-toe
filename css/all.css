@@ -1,5 +1,4 @@
 
-
 h1 {
   text-align:center;
   font-family:"Arial", sans-serif;
@@ -12,7 +11,7 @@ canvas, button {
 }
 
 #container{
- width:150px;
+ text-align:center;
  margin:3em auto;
 }
 
