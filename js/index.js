@@ -18,13 +18,13 @@ $(document).ready(function(){
       // check for winner
       var winner = this.board.hasWinner();
       if (winner === 'X' || winner == 'O') {
-        alert (winner + ' wins');
+        $('#result').html(winner + ' wins');
         game.active = false;
       }
 
       // no winner, check if board is full
       else if (this.board.isFull()) { 
-        alert('it\'s a tie..');
+        $('#result').html("Meow...");
       }
 
       // board isn't full, carry on
@@ -330,6 +330,7 @@ $(document).ready(function(){
   $('#new-game').on('click', function(){
     var size = $('#board').width();
     $('#board').remove();
+    $('#result').html('');
     $('#container').prepend($("<canvas id='board' width='"+size+"' height='"+size+"'></canvas>"))
     
     game = new Game();
