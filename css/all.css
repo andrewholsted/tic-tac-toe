@@ -15,7 +15,7 @@ canvas, button {
 #result {
   text-align:center;
   height:2em;
-  line-height:1em;
+  line-height:2em;
   padding:1em;
   font-size:20px;
   color:#37b042;
@@ -27,7 +27,7 @@ canvas, button {
 
 #new-game {
   display:block;
-  margin:3em auto;
+  margin:4em auto;
   padding:.5em 1em;
 }
 
