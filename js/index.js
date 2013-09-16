@@ -3,18 +3,16 @@ $(document).ready(function(){
   function Game(options){
     this.board = new Board();
     this.active = true;
-    this.currentPlayer = 'X';
-    this.computer = 'O';
   }
 
   Game.prototype = {
-    setup: function(){
-      this.board.canvas[0].width = this.board.canvas[0].width;
-      this.board.draw(3);
+    setup: function(options){
+      this.currentPlayer = options.player;
+      this.computer = options.computer;
+      this.board.draw(options.size);
     },
 
     step: function(){
-
       // check to see if we have a winner
       var winner = this.board.hasWinner();
       if (winner === 'X' || winner == 'O') {
@@ -81,33 +79,30 @@ $(document).ready(function(){
   Board.prototype = {
 
     //draw the initial board
-    draw: function(size){
+    draw: function(){
       var canvas = this.canvas;
-      canvas[0].width = canvas[0].width;
-      var width = canvas.width();
       var context = canvas[0].getContext('2d');
+      var width = canvas.width();
       context.beginPath();
 
       // draw vertical lines
-      context.moveTo(50,0);
-      context.lineTo(50,150);
-      context.moveTo(100,0);
-      context.lineTo(100,150);
+      context.moveTo(width/3,0);     //width * .3  , 0
+      context.lineTo(width/3,width);   //width * .3 , width
+      context.moveTo((width*2)/3,0);    //width * .6 , 0
+      context.lineTo((width*2)/3,width);  // width *.6, width
 
       // draw horizontal lines
-      context.moveTo(0,50);
-      context.lineTo(150,50);
-      context.moveTo(0,100);
-      context.lineTo(150,100);
+      context.moveTo(0,width/3);     //0, width * .3
+      context.lineTo(width,width/3);   // width, width *.3
+      context.moveTo(0,(width*2)/3);    //0 , width *.6
+      context.lineTo(width,(width*2)/3);  //width, width *.6
       context.stroke();
 
-      var size = size -1;
       var id = 0;
-      var width = canvas.width()/3;
-      var height = canvas.height()/3;
-
-      for(i=0;i<=size;i++){
-        for(j=0;j<=size;j++){
+      var width = width/3;
+      var height = width;
+      for(i=0;i<=2;i++){
+        for(j=0;j<=2;j++){
           this.squares.push(new Square(id++,width*j, height*i, canvas));
         }
       }
@@ -197,6 +192,7 @@ $(document).ready(function(){
   function Square(id,offsetX, offsetY, canvas) {
       this.id = id;
       this.value = null;
+      this.squareWidth = canvas.width()/3;
       this.canvas = canvas;
       this.xMin = offsetX;
       this.yMin = offsetY;
@@ -206,16 +202,18 @@ $(document).ready(function(){
     draw: function(shape){
       var xMin = this.xMin;
       var yMin = this.yMin;
+      var maxOffset = (this.squareWidth*.85);
+      var minOffset = (this.squareWidth*.15);
       var context = this.canvas[0].getContext('2d');
       if (shape == 'X') {
         context.beginPath();
         //draw first diagonal
-        context.moveTo(xMin+5,yMin+5);
-        context.lineTo(xMin+45,yMin+45);
+        context.moveTo(xMin+minOffset,yMin+minOffset);
+        context.lineTo(xMin+maxOffset,yMin+maxOffset);
 
         //draw second diagonal
-        context.moveTo(xMin+45,yMin+5);
-        context.lineTo(xMin+5,yMin+45);
+        context.moveTo(xMin+maxOffset,yMin+minOffset);
+        context.lineTo(xMin+minOffset,yMin+maxOffset);
         
         context.stroke();
         this.empty = false;
@@ -224,7 +222,7 @@ $(document).ready(function(){
       else if (shape == 'O'){
         //I can draw circles
         context.beginPath();
-        context.arc(xMin+25,yMin+25,20,20,Math.PI*2,true);
+        context.arc(xMin+(this.squareWidth/2),yMin+(this.squareWidth/2),this.squareWidth/2.6,this.squareWidth/2.6,Math.PI*2,true);
         context.stroke();
         this.value = 'O';
       }
@@ -232,8 +230,8 @@ $(document).ready(function(){
 
     check_position: function(x,y){
       //get which square we clicked on
-      var xMax = this.xMin + 50;
-      var yMax = this.yMin + 50;
+      var xMax = this.xMin + (this.squareWidth-1);
+      var yMax = this.yMin + (this.squareWidth-1);
       if ((x >= this.xMin && x <= xMax) && (y >= this.yMin && y <= yMax)){
         return this.id;
       }
@@ -319,13 +317,21 @@ var Negamax = function(maxDepth) {
   }
 
   var game = new Game();
-  game.setup();
+  game.setup({
+    computer:'O',
+    player: 'X',
+    size: 3
+  });
 
   $('#new-game').on('click', function(){
     $('#board').remove();
     $('#container').prepend($("<canvas id='board' width='150' height='150'></canvas>"))
     game = new Game();
-    game.setup();
+    game.setup({
+      computer:'O',
+      player: 'X',
+      size: 3,
+    });
 
   });
 });
