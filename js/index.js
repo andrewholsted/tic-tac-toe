@@ -106,7 +106,9 @@ $(document).ready(function(){
       var id = 0;
       for(i=0;i<=2;i++){
         for(j=0;j<=2;j++){
-          this.squares.push(new Square(id++,oneThird*j, oneThird*i, this.canvas));  // (id, width, height, canvas)
+
+          // new Square(id, width, height, canvas)
+          this.squares.push(new Square(id++,oneThird*j, oneThird*i, this.canvas));  
         }
       }
 
@@ -206,8 +208,8 @@ $(document).ready(function(){
       var minOffset = (w*.15);
       var context = this.context;
       if (shape == 'X') {
+        
         //draw X
-
         context.beginPath();
        
         context.moveTo(xMin+minOffset,yMin+minOffset);
@@ -224,7 +226,6 @@ $(document).ready(function(){
       else if (shape == 'O'){
 
         // draw O
-
         context.beginPath();
 
         context.arc(xMin+(w/2),yMin+(w/2),w/2.6,w/2.6,Math.PI*2,true);
@@ -245,7 +246,7 @@ $(document).ready(function(){
   }
 
   // Negamax
-  // Inspired by http://mkuklis.github.io/tictactoe/docs/tictactoe.html
+  // heavily inspired by http://mkuklis.github.io/tictactoe/docs/tictactoe.html
 
   var Negamax = function(maxDepth) {
     this.INFINITY = 999,
@@ -311,8 +312,6 @@ $(document).ready(function(){
    
       return alpha;
     },
-
-    //solve this bitch
 
     solve: function(board, player) {
       this.bestmove = -1;
