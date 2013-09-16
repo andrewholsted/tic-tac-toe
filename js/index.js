@@ -1,4 +1,5 @@
 $(document).ready(function(){
+  
   function Game(options){
     this.board = new Board();
     this.active = true;
@@ -8,19 +9,17 @@ $(document).ready(function(){
 
   Game.prototype = {
     setup: function(){
+      this.board.canvas[0].width = this.board.canvas[0].width;
       this.board.draw(3);
-      this.board.listen();
     },
 
-    reset: function(){
-
-    },
-    step:function(){
+    step: function(){
 
       // check to see if we have a winner
       var winner = this.board.hasWinner();
       if (winner === 'X' || winner == 'O') {
-        alert(winner);
+        alert (winner + ' wins');
+        game.active = false;
       }
 
       // no winner so check to see if board is full
@@ -84,6 +83,7 @@ $(document).ready(function(){
     //draw the initial board
     draw: function(size){
       var canvas = this.canvas;
+      canvas[0].width = canvas[0].width;
       var width = canvas.width();
       var context = canvas[0].getContext('2d');
       context.beginPath();
@@ -111,6 +111,8 @@ $(document).ready(function(){
           this.squares.push(new Square(id++,width*j, height*i, canvas));
         }
       }
+
+       this.listen();
     },
 
     // setup out click listener for the board
@@ -184,8 +186,8 @@ $(document).ready(function(){
         if (this.s(this.w[i][0]) === this.s(this.w[i][1]) 
           && this.s(this.w[i][0]) === this.s(this.w[i][2]) 
           && this.s(this.w[i][0]) != 0) {
-          
           return this.s(this.w[i][0]);
+
         }
       }
       return -1;
@@ -318,5 +320,13 @@ var Negamax = function(maxDepth) {
 
   var game = new Game();
   game.setup();
+
+  $('#new-game').on('click', function(){
+    $('#board').remove();
+    $('#container').prepend($("<canvas id='board' width='150' height='150'></canvas>"))
+    game = new Game();
+    game.setup();
+
+  });
 });
 
