@@ -18,13 +18,13 @@ $(document).ready(function(){
       // check for winner
       var winner = this.board.hasWinner();
       if (winner === 'X' || winner == 'O') {
-        $('#result').html(winner + ' wins');
+        $('#result').html('"'+winner +'" Wins!');
         game.active = false;
       }
 
       // no winner, check if board is full
       else if (this.board.isFull()) { 
-        $('#result').html("Meow...");
+        $('#result').html("Meow.");
       }
 
       // board isn't full, carry on
